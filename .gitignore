@@ -4,3 +4,5 @@ insertion_sort_runner
 # macOS debug symbols
 *.dSYM
 
+# VS Code settings (optional but good practice)
+.vscode/
