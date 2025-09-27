@@ -1,0 +1,6 @@
+# Executables and build artifacts
+insertion_sort_runner
+
+# macOS debug symbols
+*.dSYM
+

@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # --- Configuration ---
-# The name of your C++ source file
+# The C++ source file to compile and run.
 CPP_SOURCE="insert_sort_al.cpp"
-# The desired name for the compiled executable
-EXECUTABLE="insertion_sort_runner"
+# The desired name for the compiled executable.
+EXECUTABLE="insert_sort_al"
 
 # --- Vector to be Sorted ---
 # MODIFY THIS LINE to test different vectors.
@@ -13,12 +13,14 @@ VECTOR_TO_SORT="7 8 2 4 9 3 6 11"
 
 
 # --- Logic ---
-# Check if the executable file does NOT exist (-f checks for a regular file)
+# Check if the executable file does NOT exist.
 if [ ! -f "$EXECUTABLE" ]; then
-    echo "Executable '$EXECUTABLE' not found. Compiling..."
-    # Compile the C++ file. The -o flag sets the output name.
-    g++ -std=c++17 -g -o "$EXECUTABLE" "$CPP_SOURCE"
-    # Check if compilation was successful
+    echo "Executable '$EXECUTABLE' not found. Compiling with clang++..."
+    # On macOS, the native C++ compiler is clang++.
+    # The arguments are the same as for g++.
+    clang++ -std=c++17 -g -o "$EXECUTABLE" "$CPP_SOURCE"
+
+    # Check if compilation was successful.
     if [ $? -ne 0 ]; then
         echo "Compilation failed. Please check your C++ code."
         exit 1
@@ -28,7 +30,6 @@ else
 fi
 
 # Run the compiled program, passing the vector as command-line arguments.
-# The shell automatically splits the string in VECTOR_TO_SORT by spaces.
 echo "------------------------------------"
 ./"$EXECUTABLE" $VECTOR_TO_SORT
 echo "------------------------------------"
