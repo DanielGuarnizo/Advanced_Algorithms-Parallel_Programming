@@ -1,115 +1,119 @@
 
 ---
 
-# C++ Debugging Environment Setup for macOS in VS Code
+# C++ Algorithm Development Framework
 
-This guide provides a step-by-step process to configure a professional C++ debugging environment on macOS using Visual Studio Code. This setup allows you to compile and debug any C++ file with a single press of the `F5` key.
+This project provides a simple, "LeetCode-style" framework for implementing and testing C++ algorithms. It separates your logic from the boilerplate, so you can focus on what matters.
 
-## Prerequisites
+## How it Works
 
-1.  **Visual Studio Code:** Must be installed.
-2.  **VS Code C/C++ Extension:** The official [C/C++ extension pack](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools) from Microsoft must be installed.
+-   **Algorithm Logic:** You write your code in a `solution.h` file.
+-   **Test Runner:** A generic framework (`include/`) handles file reading, argument parsing, and printing results.
+-   **Test Cases:** Each algorithm has its own `run.sh` script where you define the specific inputs for testing.
 
-## Step 1: Install Xcode Command Line Tools
+---
 
-macOS does not include a C++ compiler by default. The easiest way to install one is by getting Apple's official command-line tools, which include the `clang++` compiler and the `lldb` debugger.
+## How to Use This Repository
 
-1.  Open the **Terminal** application.
-2.  Run the following command:
+### Prerequisites
+
+1.  **macOS:** With Xcode Command Line Tools installed (`xcode-select --install`).
+2.  **Visual Studio Code:** With the official [C/C++ extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools).
+
+### Running an Existing Algorithm (from Terminal)
+
+1.  Navigate to the algorithm's directory:
     ```bash
-    xcode-select --install
+    cd SerialAlgorithms/DivideAndConquer/matrix_multiplication
     ```
-3.  A dialog box will appear. Click **"Install"** and agree to the license terms. This will download and install the necessary tools.
-
-4.  To verify the installation, run this command in your terminal. You should see version information for Apple's `clang` compiler.
+2.  Run the test script:
     ```bash
-    clang++ --version
+    ./run.sh
     ```
+    The script will compile the code and run it with the test case defined inside `run.sh`.
 
-## Step 2: Project Setup in VS Code
+### Debugging an Existing Algorithm (in VS Code)
 
-1.  Open your main project folder in VS Code. For this project, that folder is `AAPP`.
-    > **File > Open Folder... >** Select your `AAPP` directory.
+1.  **Open `solution.h`** for the algorithm you want to test and set a breakpoint.
+2.  **Open `launch.json`** (`.vscode/launch.json`) and update the `"args"` array with the correct test inputs (e.g., `["matrix.txt", "vector.txt"]`).
+3.  **IMPORTANT: Click on the `main.cpp` tab** in the algorithm's folder to make it the active file.
+4.  Press **`F5`**.
 
-2.  This will create a `.vscode` directory inside `AAPP` to store the following configuration files.
+The debugger will compile and stop at your breakpoint.
 
-## Step 3: Configure the Build Task (`tasks.json`)
+---
 
-This file tells VS Code how to compile your active C++ file using `clang++`.
 
-1.  In VS Code, open the Command Palette (`Cmd+Shift+P`).
-2.  Type `Tasks: Configure Default Build Task` and press Enter.
-3.  Select `C/C++: clang++ build active file` from the list.
-4.  VS Code will create a `.vscode/tasks.json` file. Replace its entire contents with the following:
+## How to Add a New Algorithm
 
-    ```json
-    {
-        "version": "2.0.0",
-        "tasks": [
-            {
-                "label": "C/C++: clang++ build active file",
-                "type": "shell",
-                "command": "/usr/bin/clang++",
-                "args": [
-                    "-std=c++17",
-                    "-g",
-                    "${file}",
-                    "-o",
-                    "${fileDirname}/${fileBasenameNoExtension}"
-                ],
-                "options": {
-                    "cwd": "${workspaceFolder}"
-                },
-                "problemMatcher": ["$gcc"],
-                "group": {
-                    "kind": "build",
-                    "isDefault": true
-                }
-            }
-        ]
+Follow this pattern to add your own algorithms to the framework.
+
+### Step 1: Create the Folder and Files
+
+1.  Create a new folder for your algorithm (e.g., `my_new_algorithm`).
+2.  Inside, create three files:
+    -   `solution.h` (for your logic)
+    -   `main.cpp` (to link to the framework)
+    -   `run.sh` (for your test case)
+3.  Add any necessary data files (e.g., `vector.txt`).
+
+### Step 2: Implement Your Logic in `solution.h`
+
+Write your code inside a `Solution` class.
+
+```cpp
+// my_new_algorithm/solution.h
+#pragma once
+#include <vector> // and any other headers you need
+
+class Solution {
+public:
+    // Define your function with its specific inputs and return type.
+    bool run(const std::vector<int>& nums, int k) {
+        // ... your algorithm logic here ...
+        return true;
     }
-    ```
+};
+```
 
-## Step 4: Configure the Debugger (`launch.json`)
+### Step 3: Link to the Framework in `main.cpp`
 
-This file tells VS Code how to launch the `lldb` debugger for your compiled program.
+This tiny file tells the framework your function's signature.
 
-1.  Go to the **Run and Debug** view in the sidebar (`Cmd+Shift+D`).
-2.  Click the link **"create a launch.json file"** and select **`C++ (GDB/LLDB)`**.
-3.  VS Code will create a `.vscode/launch.json` file. Replace its entire contents with the following:
+```cpp
+// my_new_algorithm/main.cpp
+#include "solution.h"
+#include "run_solution.h"
 
-    ```json
-    {
-        "version": "0.2.0",
-        "configurations": [
-            {
-                "name": "(lldb) Build and Debug Active File",
-                "type": "cppdbg",
-                "request": "launch",
-                "program": "${fileDirname}/${fileBasenameNoExtension}",
-                "args": [],
-                "stopAtEntry": false,
-                "cwd": "${fileDirname}",
-                "environment": [],
-                "externalConsole": false,
-                "MIMode": "lldb",
-                "preLaunchTask": "C/C++: clang++ build active file"
-            }
-        ]
-    }
-    ```
+int main(int argc, char* argv[]) {
+    // Declare the signature: TestRunner<Solution, ReturnType, Arg1Type, ...>
+    TestRunner<Solution, bool, const std::vector<int>&, int> runner;
+    return runner.execute(argc, argv);
+}
+```
 
-## How to Debug Your Code (Daily Workflow)
+### Step 4: Define a Test Case in `run.sh`
 
-With the one-time setup complete, debugging any C++ file is now simple.
+Copy this template and edit the `PROGRAM_ARGS` array with your test inputs.
 
-1.  **Open the C++ file** you want to debug.
-2.  **Set a breakpoint** by clicking in the gutter to the left of a line number. A red dot will appear.
-3.  **(Optional) Add Command-Line Arguments:** If your program needs arguments (like our sorting algorithm), add them to the `"args": []` array in the `.vscode/launch.json` file.
-    *Example:*
-    ```json
-    "args": ["8", "2", "4", "9", "3", "6"],
-    ```
-4.  **Press `F5`** to start debugging.
+```bash
+#!/bin/bash
+CPP_SOURCE="main.cpp"
+EXECUTABLE="runner"
 
-VS Code will automatically compile your file, run the executable with your specified arguments, and pause execution at your breakpoint, allowing you to inspect variables and control the program flow.
+# --- Define Test Case Arguments ---
+# List filenames, numbers, or strings for your test.
+PROGRAM_ARGS=("vector.txt" "42")
+
+# --- Logic (Do not edit) ---
+if [ ! -f "$EXECUTABLE" ] || [ "$CPP_SOURCE" -nt "$EXECUTABLE" ]; then
+    echo "Compiling '$CPP_SOURCE' with clang++..."
+    clang++ -std=c++17 -g -I"$(dirname "$0")/../../../include" -o "$EXECUTABLE" "$CPP_SOURCE"
+    if [ $? -ne 0 ]; then echo "Compilation failed."; exit 1; fi
+fi
+echo "------------------------------------"
+./"$EXECUTABLE" "${PROGRAM_ARGS[@]}"
+echo "------------------------------------"
+```
+
+You are now ready to run and debug your new algorithm using the steps at the top of this guide.
